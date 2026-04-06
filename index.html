@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIWDECOR | المعرض</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --gold: #c19a6b; --dark: #1a1a1a; --light: #f4f4f4; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: var(--dark); }
+        header { background: var(--dark); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--gold); cursor: pointer; text-decoration: none; }
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .section-title { border-right: 5px solid var(--gold); padding-right: 15px; margin: 30px 0 15px; font-size: 1.3rem; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        /* هذا الجزء يضمن ظهور الصورة المرفوعة خارجياً */
+        .card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; }
+        
+        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.4); z-index: 1000; width: 85%; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; }
+        .btn-add { background: var(--gold); color: white; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo" onclick="toggleAdmin()">DIWDECOR</div>
+    <div style="font-size: 0.8rem;">لوحة التحكم</div>
+</header>
+
+<div class="container" id="mainDisplay">
+    <p style="text-align:center;">جاري تحميل التصاميم...</p>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleAdmin()"></div>
+<div id="adminPanel">
+    <h3 style="text-align: center;">إضافة عمل جديد</h3>
+    <input type="text" id="t" placeholder="عنوان الصورة (مثال: مطبخ)">
+    <input type="text" id="u" placeholder="رابط الصورة المباشر (i.ibb.co)">
+    <select id="c">
+        <option value="مجالس">مجالس</option>
+        <option value="مطابخ">مطابخ</option>
+        <option value="غرف نوم">غرف نوم</option>
+    </select>
+    <button class="btn-add" onclick="saveToFirebase()">حفظ ونشر</button>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB_Rj089s8Pwh5hrZjzAcki-gN7VL8JhB0",
+      authDomain: "diwd-a7709.firebaseapp.com",
+      databaseURL: "https://diwd-a7709-default-rtdb.firebaseio.com/",
+      projectId: "diwd-a7709",
+      storageBucket: "diwd-a7709.appspot.com",
+      appId: "1:190314181686:web:97b7f8674522bdbb4d5497"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function toggleAdmin() {
+        const p = document.getElementById('adminPanel');
+        const o = document.getElementById('overlay');
+        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        o.style.display = (o.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function saveToFirebase() {
+        const title = document.getElementById('t').value;
+        const url = document.getElementById('u').value;
+        const cat = document.getElementById('c').value;
+
+        if(title && url) {
+            db.ref('works').push({ title, img: url, category: cat })
+            .then(() => { alert("تمت الإضافة!"); location.reload(); });
+        } else { alert("أكمل البيانات أولاً"); }
+    }
+
+    db.ref('works').on('value', snap => {
+        const display = document.getElementById('mainDisplay');
+        const data = snap.val();
+        if(!data) { display.innerHTML = "المعرض فارغ حالياً"; return; }
+        
+        display.innerHTML = "";
+        let groups = {};
+        for(let id in data) {
+            let item = data[id];
+            if(!groups[item.category]) groups[item.category] = [];
+            groups[item.category].push(item);
+        }
+
+        for(let cat in groups) {
+            let html = `<h2 class="section-title">${cat}</h2><div class="gallery">`;
+            groups[cat].forEach(item => {
+                html += `<div class="card">
+                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300?text=Error+Link'">
+                            <div style="padding:10px;">${item.title}</div>
+                         </div>`;
+            });
+            html += `</div>`;
+            display.innerHTML += html;
+        }
+    });
+</script>
+</body>
+</html>
