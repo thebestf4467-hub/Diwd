@@ -3,146 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer">
-    <title>سما الكرم | محمد البعاج للديكور</title>
+    <title>سما الكرم | للأثاث والديكور الداخلي</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Changa:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { 
-            /* تحديث اللون: فانيلا لاتيه أعمق */
-            --vanilla-latte: #e8dcc4; 
-            --snow-gray: #f2f2f2; /* رمادي ثلجي */
-            --dark-gray: #333; 
-            --accent: #b8915e; /* ذهبي معتق للأزرار */
-            --white: #ffffff;
-            --green: #25d366; 
-            --red: #e74c3c;
+        :root { --vanilla: #e8dcc4; --dark: #2c2c2c; --gold: #b8915e; --light-brown: #a67c52; --white: #ffffff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { background-color: #fcfcfc; color: var(--dark); font-family: 'Cairo', sans-serif; direction: rtl; }
+
+        header { position: sticky; top: 0; z-index: 2000; background: #fff; padding: 15px 0; border-bottom: 2px solid var(--vanilla); text-align: center; }
+        .logo { font-size: 2.2rem; font-family: 'Changa', sans-serif; font-weight: 800; cursor: pointer; }
+        
+        .welcome-hero { 
+            padding: 80px 20px; text-align: center; 
+            background: linear-gradient(rgba(232, 220, 196, 0.85), rgba(255, 255, 255, 0.9));
+            margin-bottom: 30px;
         }
+        .welcome-hero h1 { font-family: 'Changa'; font-size: 2.8rem; color: var(--dark); margin-bottom: 15px; }
+        .welcome-hero p { font-size: 1.2rem; color: #444; max-width: 700px; margin: auto; line-height: 1.8; }
+
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--snow-gray); color: var(--dark-gray); font-family: 'Cairo', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
+        .cats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .cat-card { background: #fff; border-radius: 20px; padding: 40px; text-align: center; border: 1px solid #eee; cursor: pointer; transition: 0.4s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .cat-card:hover { transform: translateY(-10px); border-color: var(--gold); background: #fff9f0; }
+        .cat-card i { font-size: 3.5rem; color: var(--gold); margin-bottom: 15px; }
 
-        .progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--dark-gray); z-index: 3000; width: 0%; transition: 0.1s; }
-
-        header { 
-            position: sticky; top: 0; z-index: 2000; 
-            background: rgba(255, 255, 255, 0.9); padding: 15px 0;
-            border-bottom: 2px solid var(--vanilla-latte); text-align: center; backdrop-filter: blur(10px);
+        /* زر العودة المطور */
+        .back-container { text-align: center; margin-bottom: 30px; }
+        .btn-back-large { 
+            display: inline-block; background: var(--dark); color: #fff; padding: 15px 40px; 
+            border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.3rem; 
+            transition: 0.3s; border: 2px solid var(--gold); cursor: pointer;
         }
-        .logo { color: var(--dark-gray); font-size: 1.8rem; font-weight: 900; cursor: pointer; }
+        .btn-back-large:hover { background: var(--gold); transform: scale(1.05); }
 
-        .nav-tabs { 
-            background: var(--white); white-space: nowrap; overflow-x: auto; padding: 12px; 
-            border-bottom: 1px solid var(--vanilla-latte); position: sticky; top: 68px; z-index: 1999; 
-            display: flex; gap: 12px; justify-content: center;
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .work-card { background: #fff; border-radius: 15px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .work-card img { width: 100%; height: 350px; object-fit: cover; }
+
+        /* زر الواتساب البني الفاتح */
+        .btn-wa-brown { 
+            display: block; background: var(--light-brown); color: #fff; text-align: center; 
+            padding: 12px; text-decoration: none; font-weight: bold; border-radius: 10px; 
+            margin-top: 10px; transition: 0.3s; font-size: 1.1rem;
         }
-        .nav-tabs::-webkit-scrollbar { display: none; }
-        .tab-link { 
-            padding: 8px 22px; background: var(--snow-gray); border-radius: 25px; text-decoration: none; 
-            color: var(--dark-gray); font-size: 0.9rem; font-weight: bold; border: 1px solid var(--vanilla-latte);
-        }
+        .btn-wa-brown:hover { background: var(--gold); }
 
-        .hero {
-            min-height: 60vh; display: flex; flex-direction: column; justify-content: center;
-            align-items: center; text-align: center; padding: 40px 20px;
-            /* خلفية هيرو تعتمد على لون الفانيلا */
-            background: linear-gradient(rgba(232, 220, 196, 0.9), rgba(232, 220, 196, 0.85)), url('https://i.postimg.cc/HnNn7n7L/hero-bg.jpg') center/cover;
-        }
-        .hero h2 { font-size: 2.5rem; color: var(--dark-gray); margin-bottom: 15px; font-weight: 900; }
+        #admin-panel { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; padding: 10px; overflow-y: auto; }
+        .modal { background: #fff; padding: 20px; border-radius: 20px; max-width: 600px; margin: 20px auto; width: 95%; }
         
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        input, select, .admin-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; }
+        .admin-btn { background: var(--gold); color: white; border: none; font-weight: bold; cursor: pointer; }
 
-        .container { max-width: 1200px; margin: auto; padding: 25px; }
-        .cat-section { margin-bottom: 50px; scroll-margin-top: 150px; }
-        .cat-title { border-right: 6px solid var(--vanilla-latte); padding-right: 15px; margin-bottom: 25px; font-size: 1.8rem; color: var(--dark-gray); }
-        
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        .card { background: var(--white); border-radius: 20px; overflow: hidden; border: 1px solid var(--vanilla-latte); transition: 0.4s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        
-        .img-box { width: 100%; height: 420px; background: #fff; display: flex; align-items: center; justify-content: center; }
-        .card img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .card-info { padding: 20px; text-align: center; background: var(--white); border-top: 1px solid var(--snow-gray); }
-        .btn-wa { background: var(--accent); color: var(--white); text-decoration: none; display: block; padding: 14px; border-radius: 12px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-wa:hover { background: var(--dark-gray); }
+        .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; background: #f9f9f9; padding: 10px; border-radius: 10px; margin: 5px 0; }
+        .icon-item { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
+        .icon-item.selected { background: var(--gold); color: #fff; }
 
-        /* لوحة الإدارة */
-        #admin-panel { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; padding: 20px; overflow-y: auto; color: #000; }
-        .modal { background: #fff; padding: 30px; border-radius: 25px; max-width: 550px; margin: auto; }
-        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .t-btn { flex: 1; padding: 12px; border: none; background: var(--snow-gray); cursor: pointer; border-radius: 10px; font-weight: bold; }
-        .t-btn.active { background: var(--dark-gray); color: #fff; }
+        .manage-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: #fdfdfd; margin-bottom: 5px; border-radius: 8px; }
         
-        input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-family: 'Cairo'; }
-        .btn-main { background: var(--dark-gray); color: #fff; border: none; font-weight: bold; cursor: pointer; }
-        
-        .manage-row { display: flex; align-items: center; gap: 12px; background: #fdfdfd; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--vanilla-latte); }
-        .manage-row img { width: 50px; height: 50px; object-fit: contain; background: var(--snow-gray); border-radius: 8px; }
-        .m-info { flex: 1; }
-        .m-btns { display: flex; gap: 8px; }
-        .btn-del { background: var(--red); color: white; border: none; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-        .btn-edit { background: var(--dark-gray); color: white; border: none; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-
-        footer { padding: 50px; background: var(--white); border-top: 1px solid var(--vanilla-latte); text-align: center; color: #888; }
+        .admin-nav { display: flex; gap: 8px; margin-bottom: 15px; }
+        .admin-nav button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
+        .active-tab { background: var(--dark) !important; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="progress-bar" id="myBar"></div>
+    <header><div class="logo" onclick="openAdmin()">سما الكرم</div></header>
 
-    <header>
-        <div class="logo" onclick="openAdmin()">سما الكرم</div>
-        <div style="color: #bbb; font-size: 0.75rem; letter-spacing: 2px; font-weight: bold;">MOHAMMAD AL-BAAJ</div>
-    </header>
-
-    <div class="nav-tabs" id="nav-bar"></div>
-
-    <section class="hero reveal">
-        <h2>فخامة التصميم برؤية عصرية</h2>
-        <p>نجمع بين دفء الألوان ودقة التنفيذ لنخلق مساحات تليق بكم.</p>
-    </section>
-
-    <div class="container" id="public-gallery">
-        <p style="text-align:center; padding: 100px; color: #aaa;">يتم الآن تجهيز المعرض الرمادي...</p>
+    <div id="main-view">
+        <section class="welcome-hero" id="hero-welcome">
+            <h1>سما الكرم للأثاث والديكور الداخلي</h1>
+            <p>نصمم لك عالمك الخاص بأجود أنواع الخشب والتصاميم العصرية. متخصصون في صناعة المطابخ الحديثة، غرف الملابس، والأثاث المودرن.</p>
+        </section>
+        <div class="container" id="content-area"></div>
     </div>
-
-    <footer>
-        <p>جميع الحقوق محفوظة لدى محمد البعاج &copy; 2026</p>
-    </footer>
 
     <div id="admin-panel">
         <div class="modal">
-            <h3 style="text-align:center; margin-bottom:20px;">إدارة الكتالوج</h3>
-            <div class="admin-tabs">
-                <button class="t-btn active" id="btn-tab-1" onclick="switchTab(1)">إضافة</button>
-                <button class="t-btn" id="btn-tab-2" onclick="switchTab(2)">الصور</button>
-                <button class="t-btn" id="btn-tab-3" onclick="switchTab(3)">الأقسام</button>
-            </div>
-            
-            <div id="pane-1" class="admin-pane">
-                <input type="hidden" id="edit-id">
-                <input type="text" id="in-title" placeholder="اسم العمل">
-                <input type="text" id="in-link" placeholder="رابط i.imgur المباشر">
-                <select id="in-cat"></select>
-                <button class="btn-main" id="btn-action" onclick="saveItem()">حفظ العمل</button>
+            <div class="admin-nav">
+                <button id="tab1" class="active-tab" onclick="switchTab(1)">إدارة الأقسام</button>
+                <button id="tab2" onclick="switchTab(2)">إضافة أعمال</button>
+                <button onclick="closeAdmin()" style="background:#eee">إغلاق</button>
             </div>
 
-            <div id="pane-2" class="admin-pane" style="display:none;"><div id="manage-list" style="max-height: 350px; overflow-y: auto;"></div></div>
-            
-            <div id="pane-3" class="admin-pane" style="display:none;">
+            <div id="sec1">
                 <input type="hidden" id="edit-cat-id">
-                <input type="text" id="new-cat-name" placeholder="اسم القسم الجديد">
-                <button class="btn-main" id="btn-cat-action" onclick="saveCategory()">إضافة القسم</button>
-                <div id="cats-admin-list" style="margin-top:15px; max-height: 250px; overflow-y: auto;"></div>
+                <input type="text" id="cat-name-in" placeholder="اسم القسم الجديد...">
+                <div class="icon-picker">
+                    <div class="icon-item" onclick="pickIcon('fas fa-utensils', this)"><i class="fas fa-utensils"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-couch', this)"><i class="fas fa-couch"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-bed', this)"><i class="fas fa-bed"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-tshirt', this)"><i class="fas fa-tshirt"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-chair', this)"><i class="fas fa-chair"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-hammer', this)"><i class="fas fa-hammer"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-lightbulb', this)"><i class="fas fa-lightbulb"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-tv', this)"><i class="fas fa-tv"></i></div>
+                    <div class="icon-item" onclick="pickIcon('fas fa-door-closed', this)"><i class="fas fa-door-closed"></i></div>
+                </div>
+                <input type="hidden" id="cat-icon-in" value="fas fa-couch">
+                <button class="admin-btn" id="cat-save-btn" onclick="saveCategory()">حفظ القسم</button>
+                <div id="admin-cats-display" style="margin-top:15px"></div>
             </div>
-            <button style="background:#eee; color:#333; margin-top:20px; border:none;" onclick="closeAdmin()">إغلاق اللوحة</button>
+
+            <div id="sec2" style="display:none">
+                <input type="text" id="w-title-in" placeholder="عنوان العمل">
+                <input type="text" id="w-link-in" placeholder="رابط الصورة المباشر">
+                <select id="w-cat-sel-in"></select>
+                <button class="admin-btn" style="background:var(--dark)" onclick="saveWork()">نشر العمل</button>
+            </div>
+
+            <div id="sec-imgs" style="display:none">
+                <button onclick="switchTab(1)" style="border:none; color:var(--gold); cursor:pointer; background:none; margin-bottom:10px;">← عودة</button>
+                <div id="imgs-control-list"></div>
+            </div>
         </div>
     </div>
 
@@ -158,111 +138,143 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // دوال التحكم
-        function getDirectImg(url) {
-            if(!url) return "";
-            let u = url.trim();
-            if(u.includes("imgur.com") && !u.includes("i.imgur.com")) u = u.replace("imgur.com", "i.imgur.com") + ".jpg";
-            if(u.includes("postimg.cc")) u = u.replace("postimg.cc", "i.postimg.cc") + ".jpg";
-            return u;
-        }
+        let appData = { works: {}, categories: {} };
 
-        function openAdmin() { if(prompt("الباسورد:") === "1234") { document.getElementById('admin-panel').style.display = 'block'; refreshAdminData(); } }
-        function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
-        
-        function switchTab(n) {
-            document.querySelectorAll('.admin-pane').forEach(p => p.style.display = 'none');
-            document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('pane-'+n).style.display = 'block';
-            document.getElementById('btn-tab-'+n).classList.add('active');
-        }
+        db.ref().on('value', snap => {
+            appData = snap.val() || { works: {}, categories: {} };
+            renderHome();
+            refreshAdmin();
+        });
 
-        function saveItem() {
-            const title = document.getElementById('in-title').value, link = getDirectImg(document.getElementById('in-link').value), cat = document.getElementById('in-cat').value, id = document.getElementById('edit-id').value;
-            if(title && link) {
-                const ref = id ? db.ref('works/'+id) : db.ref('works').push();
-                ref.set({title, link, cat}).then(() => location.reload());
+        function renderHome() {
+            const area = document.getElementById('content-area');
+            document.getElementById('hero-welcome').style.display = 'block';
+            let html = `<div class="cats-grid">`;
+            for(let id in appData.categories) {
+                let c = appData.categories[id];
+                html += `<div class="cat-card" onclick="showGallery('${c.name}')">
+                    <i class="${c.icon || 'fas fa-couch'}"></i>
+                    <h3>${c.name}</h3>
+                    <p style="color:var(--gold); margin-top:5px;">تصفح التصاميم ←</p>
+                </div>`;
             }
+            area.innerHTML = html + `</div>`;
+        }
+
+        function showGallery(catName) {
+            document.getElementById('hero-welcome').style.display = 'none';
+            const area = document.getElementById('content-area');
+            
+            // الهيدر المطور لزر العودة
+            let html = `
+                <div class="back-container">
+                    <div class="btn-back-large" onclick="renderHome()">
+                        <i class="fas fa-arrow-right"></i> العودة للأقسام الرئيسية
+                    </div>
+                </div>
+                <h2 style="font-family:'Changa'; text-align:center; margin-bottom:40px; font-size:2rem; color:var(--gold); border-bottom:2px solid var(--vanilla); padding-bottom:15px;">${catName}</h2>
+                <div class="gallery">`;
+
+            for(let id in appData.works) {
+                if(appData.works[id].cat === catName) {
+                    html += `<div class="work-card">
+                        <img src="${appData.works[id].link}">
+                        <div style="padding:15px; text-align:center;">
+                            <strong style="font-size:1.1rem">${appData.works[id].title}</strong>
+                            <a href="https://wa.me/9647839529360" class="btn-wa-brown">
+                                <i class="fab fa-whatsapp"></i> تواصل لطلب التصميم
+                            </a>
+                        </div>
+                    </div>`;
+                }
+            }
+            area.innerHTML = html + `</div>`;
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        function openAdmin() { if(prompt("الباسورد:") === "1234") document.getElementById('admin-panel').style.display='block'; }
+        function closeAdmin() { document.getElementById('admin-panel').style.display='none'; }
+
+        function switchTab(n) {
+            document.getElementById('sec1').style.display = (n===1)?'block':'none';
+            document.getElementById('sec2').style.display = (n===2)?'block':'none';
+            document.getElementById('sec-imgs').style.display = 'none';
+            document.getElementById('tab1').className = (n===1)?'active-tab':'';
+            document.getElementById('tab2').className = (n===2)?'active-tab':'';
+        }
+
+        function pickIcon(code, el) {
+            document.querySelectorAll('.icon-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('cat-icon-in').value = code;
         }
 
         function saveCategory() {
-            const name = document.getElementById('new-cat-name').value, id = document.getElementById('edit-cat-id').value;
+            const id = document.getElementById('edit-cat-id').value;
+            const name = document.getElementById('cat-name-in').value;
+            const icon = document.getElementById('cat-icon-in').value;
             if(name) {
                 const ref = id ? db.ref('categories/'+id) : db.ref('categories').push();
-                ref.set(name).then(() => { document.getElementById('new-cat-name').value=""; document.getElementById('edit-cat-id').value=""; refreshAdminData(); });
-            }
-        }
-
-        function refreshAdminData() {
-            db.ref('categories').once('value', s => {
-                const cats = s.val(), sel = document.getElementById('in-cat'), list = document.getElementById('cats-admin-list');
-                sel.innerHTML = '<option value="">بدون قسم</option>'; list.innerHTML = "";
-                for(let id in cats) {
-                    sel.innerHTML += `<option value="${cats[id]}">${cats[id]}</option>`;
-                    list.innerHTML += `<div class="manage-row"><span>${cats[id]}</span><div class="m-btns">
-                        <button class="btn-edit" onclick="document.getElementById('edit-cat-id').value='${id}'; document.getElementById('new-cat-name').value='${cats[id]}';"><i class="fas fa-edit"></i></button>
-                        <button class="btn-del" onclick="if(confirm('حذف القسم؟')) db.ref('categories/${id}').remove().then(refreshAdminData)"><i class="fas fa-trash"></i></button>
-                    </div></div>`;
-                }
-            });
-            db.ref('works').once('value', s => {
-                const works = s.val(), list = document.getElementById('manage-list'); list.innerHTML = "";
-                for(let id in works) list.innerHTML += `<div class="manage-row"><img src="${works[id].link}"><span>${works[id].title}</span><div class="m-btns">
-                    <button class="btn-edit" onclick="startEdit('${id}','${works[id].title}','${works[id].link}','${works[id].cat}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn-del" onclick="if(confirm('حذف الصورة؟')) db.ref('works/${id}').remove().then(refreshAdminData)"><i class="fas fa-trash"></i></button>
-                </div></div>`;
-            });
-        }
-
-        function startEdit(id, t, l, c) {
-            document.getElementById('edit-id').value = id; document.getElementById('in-title').value = t;
-            document.getElementById('in-link').value = l; document.getElementById('in-cat').value = c;
-            switchTab(1); document.getElementById('btn-action').innerText = "تحديث البيانات";
-        }
-
-        function reveal() {
-            document.querySelectorAll(".reveal").forEach(el => {
-                let rect = el.getBoundingClientRect();
-                if (rect.top < window.innerHeight - 50 && rect.bottom > 0) el.classList.add("active");
-                else el.classList.remove("active");
-            });
-            let scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            document.getElementById("myBar").style.width = scrolled + "%";
-        }
-
-        window.addEventListener("scroll", reveal);
-
-        // تحميل البيانات للزوار
-        db.ref().on('value', snap => {
-            const data = snap.val(), gallery = document.getElementById('public-gallery'), nav = document.getElementById('nav-bar');
-            if(!data || !data.works) return;
-            let grouped = {"أحدث الأعمال": []}, navH = "";
-            if(data.categories) {
-                for(let id in data.categories) {
-                    let n = data.categories[id];
-                    navH += `<a href="#cat-${id}" class="tab-link">${n}</a>`;
-                    grouped[n] = [];
-                }
-            }
-            nav.innerHTML = navH;
-            for(let id in data.works) {
-                let item = data.works[id], c = item.cat || "أحدث الأعمال";
-                if(!grouped[c]) grouped[c] = []; grouped[c].push(item);
-            }
-            let html = "";
-            for(let cat in grouped) {
-                if(grouped[cat].length === 0) continue;
-                let sId = "cat-general";
-                if(data.categories) for(let id in data.categories) if(data.categories[id] === cat) sId = "cat-"+id;
-                html += `<section class="cat-section reveal" id="${sId}"><h2 class="cat-title">${cat}</h2><div class="gallery">`;
-                grouped[cat].forEach(w => {
-                    html += `<div class="card reveal"><div class="img-box"><img src="${w.link}"></div><div class="card-info"><strong>${w.title}</strong><a href="https://wa.me/9647839529360" class="btn-wa">استفسار واتساب 💬</a></div></div>`;
+                ref.set({name, icon}).then(() => {
+                    document.getElementById('cat-name-in').value = "";
+                    document.getElementById('edit-cat-id').value = "";
+                    document.getElementById('cat-save-btn').innerText = "حفظ القسم";
                 });
-                html += `</div></section>`;
             }
-            gallery.innerHTML = html;
-            setTimeout(reveal, 400);
-        });
+        }
+
+        function editCat(id) {
+            const c = appData.categories[id];
+            document.getElementById('edit-cat-id').value = id;
+            document.getElementById('cat-name-in').value = c.name;
+            document.getElementById('cat-icon-in').value = c.icon;
+            document.getElementById('cat-save-btn').innerText = "تحديث اسم القسم";
+        }
+
+        function refreshAdmin() {
+            const list = document.getElementById('admin-cats-display');
+            const sel = document.getElementById('w-cat-sel-in');
+            list.innerHTML = ""; sel.innerHTML = "";
+            for(let id in appData.categories) {
+                let c = appData.categories[id];
+                sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                list.innerHTML += `<div class="manage-row">
+                    <span><i class="${c.icon}"></i> ${c.name}</span>
+                    <div>
+                        <button onclick="editCat('${id}')" style="background:#3498db; color:#fff; border:none; padding:5px 8px; border-radius:5px; cursor:pointer;">تعديل</button>
+                        <button onclick="manageImgs('${c.name}')" style="background:var(--gold); color:#fff; border:none; padding:5px 8px; border-radius:5px; cursor:pointer;">الصور</button>
+                        <button onclick="db.ref('categories/${id}').remove()" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            }
+        }
+
+        function saveWork() {
+            const title = document.getElementById('w-title-in').value;
+            const link = document.getElementById('w-link-in').value;
+            const cat = document.getElementById('w-cat-sel-in').value;
+            if(title && link) db.ref('works').push({title, link, cat}).then(() => {
+                alert("تم الحفظ");
+                document.getElementById('w-title-in').value = "";
+                document.getElementById('w-link-in').value = "";
+            });
+        }
+
+        function manageImgs(catName) {
+            document.getElementById('sec1').style.display='none';
+            document.getElementById('sec-imgs').style.display='block';
+            const list = document.getElementById('imgs-control-list');
+            list.innerHTML = `<h4>تحكم بصور: ${catName}</h4>`;
+            for(let id in appData.works) {
+                if(appData.works[id].cat === catName) {
+                    list.innerHTML += `<div class="manage-row">
+                        <img src="${appData.works[id].link}" style="width:40px; height:40px; object-fit:cover; border-radius:5px;">
+                        <span>${appData.works[id].title}</span>
+                        <button onclick="db.ref('works/${id}').remove()" style="color:red; border:none; background:none;"><i class="fas fa-trash"></i></button>
+                    </div>`;
+                }
+            }
+        }
     </script>
 </body>
 </html>
