@@ -4,73 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>DIWDECOR | معرض أعمال الديكور والحجر</title>
+    <title>DIWDECOR | المعرض</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --gold: #c19a6b; --dark: #1a1a1a; --white: #ffffff; --bg: #f4f4f4; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); color: var(--dark); overflow-x: hidden; }
-        
-        /* الهيدر */
-        header { background: var(--dark); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .logo { font-size: 1.7rem; font-weight: bold; color: var(--gold); cursor: pointer; transition: 0.3s; }
-        .logo:hover { opacity: 0.8; }
-        
-        /* الحاوية الرئيسية */
-        .container { max-width: 1100px; margin: auto; padding: 20px; }
-        .section-title { border-right: 6px solid var(--gold); padding-right: 15px; margin: 40px 0 20px; font-size: 1.4rem; color: var(--dark); }
-        
-        /* شبكة الصور */
+        :root { --gold: #c19a6b; --dark: #1a1a1a; }
+        body { font-family: sans-serif; margin: 0; background: #f4f4f4; padding-bottom: 50px; }
+        header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 1.8rem; font-weight: bold; color: var(--gold); cursor: pointer; }
+        .container { max-width: 1000px; margin: auto; padding: 15px; }
+        .section-title { border-right: 5px solid var(--gold); padding-right: 15px; margin: 30px 0 15px; font-size: 1.3rem; }
         .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.08); transition: 0.3s; border: 1px solid #eee; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* هذا الجزء يضمن عرض الصورة بشكل إجباري */
+        .card img { width: 100%; height: 250px; object-fit: cover; display: block; background: #eee; }
+        .card-info { padding: 15px; text-align: center; font-weight: bold; }
         
-        /* إعدادات الصورة لضمان الظهور */
-        .card img { width: 100%; height: 240px; object-fit: cover; display: block; background: #ddd; border-bottom: 2px solid #f0f0f0; }
-        .card-info { padding: 15px; text-align: center; font-weight: bold; font-size: 1rem; color: #333; }
-
-        /* لوحة التحكم */
-        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.5); z-index: 2000; width: 85%; max-width: 400px; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; backdrop-filter: blur(3px); }
-        
+        #admin { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 2000; width: 85%; max-width: 400px; }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; box-sizing: border-box; }
-        .btn-post { background: var(--gold); color: white; border: none; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .btn-post:active { transform: scale(0.98); }
-        
-        .loading { text-align: center; padding: 50px; font-style: italic; color: #777; }
+        .btn { background: var(--gold); color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo" onclick="toggleAdmin()">DIWDECOR</div>
-    <div style="font-size: 0.8rem; border: 1px solid var(--gold); padding: 4px 8px; border-radius: 4px;">لوحة الإدارة</div>
+    <div class="logo" onclick="toggle()">DIWDECOR</div>
 </header>
 
-<div class="container" id="mainGallery">
-    <div class="loading">جاري مزامنة الأعمال من قاعدة البيانات...</div>
+<div class="container" id="output">
+    <p style="text-align:center;">جاري تحميل معرض الصور...</p>
 </div>
 
-<div class="overlay" id="overlay" onclick="toggleAdmin()"></div>
-<div id="adminPanel">
-    <h3 style="text-align: center; margin-top: 0;">إضافة عمل جديد 🏗️</h3>
-    <input type="text" id="wTitle" placeholder="اسم التصميم (مثلاً: واجهة حجر)">
-    <input type="text" id="wLink" placeholder="رابط الصورة المباشر (Direct Link)">
-    <select id="wCat">
+<div class="overlay" id="overlay" onclick="toggle()"></div>
+<div id="admin">
+    <h3 style="text-align: center;">إضافة عمل جديد</h3>
+    <input type="text" id="title" placeholder="اسم التصميم">
+    <input type="text" id="link" placeholder="رابط i.ibb.co المباشر">
+    <select id="cat">
         <option value="واجهات حجر">واجهات حجر</option>
         <option value="مطابخ">مطابخ</option>
-        <option value="غرف نوم">غرف نوم</option>
         <option value="مجالس">مجالس</option>
     </select>
-    <button class="btn-post" onclick="submitWork()">نشر الآن</button>
-    <p style="font-size: 0.7rem; color: #888; text-align: center;">تأكد أن الرابط يبدأ بـ i.ibb.co وينتهي بـ .jpg</p>
+    <button class="btn" onclick="send()">نشر الآن</button>
 </div>
 
 <script>
-    // إعدادات Firebase (مشروعك ديوان ديكور)
-    const firebaseConfig = {
+    const config = {
       apiKey: "AIzaSyB_Rj089s8Pwh5hrZjzAcki-gN7VL8JhB0",
       authDomain: "diwd-a7709.firebaseapp.com",
       databaseURL: "https://diwd-a7709-default-rtdb.firebaseio.com/",
@@ -79,73 +61,57 @@
       appId: "1:190314181686:web:97b7f8674522bdbb4d5497"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    firebase.initializeApp(config);
+    const db = firebase.database();
 
-    function toggleAdmin() {
-        const p = document.getElementById('adminPanel');
+    function toggle() {
+        const a = document.getElementById('admin');
         const o = document.getElementById('overlay');
-        const isShow = p.style.display === 'block';
-        p.style.display = isShow ? 'none' : 'block';
-        o.style.display = isShow ? 'none' : 'block';
+        const show = a.style.display === 'block';
+        a.style.display = show ? 'none' : 'block';
+        o.style.display = show ? 'none' : 'block';
     }
 
-    function submitWork() {
-        const t = document.getElementById('wTitle').value;
-        const l = document.getElementById('wLink').value;
-        const c = document.getElementById('wCat').value;
-
-        if(!t || !l) return alert("يرجى إدخال الاسم والرابط المباشر");
-
-        // إرسال البيانات
-        database.ref('works').push({
-            title: t,
-            image: l, // سنحفظها باسم image لتوحيد الكود
-            category: c
-        }).then(() => {
-            alert("تم النشر بنجاح!");
-            toggleAdmin();
-            document.getElementById('wTitle').value = "";
-            document.getElementById('wLink').value = "";
-        });
-    }
-
-    // جلب وعرض البيانات
-    database.ref('works').on('value', snap => {
-        const main = document.getElementById('mainGallery');
-        const data = snap.val();
-        
-        if(!data) {
-            main.innerHTML = "<div class='loading'>المعرض فارغ حالياً. اضغط على الاسم للأعلى للبدء.</div>";
-            return;
+    function send() {
+        const t = document.getElementById('title').value;
+        const l = document.getElementById('link').value;
+        const c = document.getElementById('cat').value;
+        if(t && l) {
+            // سنخزن الرابط في حقل اسمه image لتوحيد الكود
+            db.ref('works').push({ title: t, image: l, category: c }).then(() => {
+                alert("تم الحفظ!");
+                toggle();
+            });
         }
+    }
 
-        main.innerHTML = "";
-        let cats = {};
-
-        // تنظيم الصور حسب التصنيف ومعالجة اختلاف أسماء الحقول
+    db.ref('works').on('value', s => {
+        const out = document.getElementById('output');
+        const data = s.val();
+        if(!data) { out.innerHTML = "المعرض فارغ"; return; }
+        
+        out.innerHTML = "";
+        let groups = {};
         for(let id in data) {
             let item = data[id];
-            let title = item.title || item.t || "بدون عنوان";
-            let imgUrl = item.image || item.img || item.l || item.url;
+            // محاولة البحث عن الرابط في أي مسمى قديم (image, img, url, l)
+            let imgUrl = item.image || item.img || item.url || item.l || "";
             let category = item.category || "عام";
-
-            if(!cats[category]) cats[category] = [];
-            cats[category].push({ title, imgUrl });
+            if(!groups[category]) groups[category] = [];
+            groups[category].push({ t: item.title || item.t, src: imgUrl });
         }
 
-        // عرض الأقسام
-        for(let name in cats) {
-            let section = `<h2 class="section-title">${name}</h2><div class="gallery">`;
-            cats[name].forEach(work => {
-                section += `
-                    <div class="card">
-                        <img src="${work.imgUrl}" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/400x300?text=Check+Link'">
-                        <div class="card-info">${work.title}</div>
-                    </div>`;
+        for(let name in groups) {
+            let html = `<h2 class="section-title">${name}</h2><div class="gallery">`;
+            groups[name].forEach(work => {
+                html += `
+                <div class="card">
+                    <img src="${work.src}" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/400x300?text=Error+Link'">
+                    <div class="card-info">${work.t}</div>
+                </div>`;
             });
-            section += `</div>`;
-            main.innerHTML += section;
+            html += `</div>`;
+            out.innerHTML += html;
         }
     });
 </script>
