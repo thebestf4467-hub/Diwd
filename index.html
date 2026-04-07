@@ -3,54 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIWDECOR | المعرض</title>
+    <meta name="referrer" content="no-referrer">
+    <title>DIWDECOR | معرض أعمال الحجر والديكور</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --gold: #c19a6b; --dark: #1a1a1a; --light: #f4f4f4; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); color: var(--dark); }
-        header { background: var(--dark); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--gold); cursor: pointer; text-decoration: none; }
-        .container { max-width: 1000px; margin: auto; padding: 20px; }
-        .section-title { border-right: 5px solid var(--gold); padding-right: 15px; margin: 30px 0 15px; font-size: 1.3rem; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-        .card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        /* هذا الجزء يضمن ظهور الصورة المرفوعة خارجياً */
-        .card img { width: 100%; height: 220px; object-fit: cover; display: block; background: #eee; }
+        :root { --gold: #c19a6b; --dark: #1a1a1a; --white: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f9f9f9; color: var(--dark); }
         
-        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.4); z-index: 1000; width: 85%; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; }
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; }
-        .btn-add { background: var(--gold); color: white; border: none; cursor: pointer; font-weight: bold; }
+        header { background: var(--dark); color: white; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .logo { font-size: 1.8rem; font-weight: bold; color: var(--gold); cursor: pointer; letter-spacing: 1px; }
+        
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .section-title { border-right: 6px solid var(--gold); padding-right: 15px; margin: 40px 0 20px; font-size: 1.5rem; color: var(--dark); text-transform: uppercase; }
+        
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: var(--white); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #eee; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        
+        .card img { width: 100%; height: 250px; object-fit: cover; display: block; background: #ececec; }
+        .card-info { padding: 20px; text-align: center; font-weight: 600; font-size: 1.1rem; }
+
+        /* لوحة التحكم المخفية */
+        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 2000; width: 90%; max-width: 450px; border: 2px solid var(--gold); }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1500; backdrop-filter: blur(5px); }
+        
+        input, select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; outline: none; }
+        .btn-submit { background: var(--gold); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: #a6835a; }
+        
+        .footer-note { font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo" onclick="toggleAdmin()">DIWDECOR</div>
-    <div style="font-size: 0.8rem;">لوحة التحكم</div>
+    <div style="font-size: 0.9rem; opacity: 0.8;">معرض أعمال الحجر</div>
 </header>
 
-<div class="container" id="mainDisplay">
-    <p style="text-align:center;">جاري تحميل التصاميم...</p>
+<div class="container" id="mainContent">
+    <p style="text-align:center; padding: 50px;">جاري جلب أحدث التصاميم من السيرفر...</p>
 </div>
 
 <div class="overlay" id="overlay" onclick="toggleAdmin()"></div>
 <div id="adminPanel">
-    <h3 style="text-align: center;">إضافة عمل جديد</h3>
-    <input type="text" id="t" placeholder="عنوان الصورة (مثال: مطبخ)">
-    <input type="text" id="u" placeholder="رابط الصورة المباشر (i.ibb.co)">
-    <select id="c">
-        <option value="مجالس">مجالس</option>
-        <option value="مطابخ">مطابخ</option>
-        <option value="غرف نوم">غرف نوم</option>
+    <h2 style="text-align: center; color: var(--dark);">إضافة تصميم جديد 🏗️</h2>
+    <input type="text" id="workTitle" placeholder="عنوان العمل (مثلاً: واجهة حجر طبيعي)">
+    <input type="text" id="workURL" placeholder="ضع رابط الصورة المباشر هنا (i.ibb.co)">
+    <select id="workCat">
+        <option value="واجهات حجر">واجهات حجر</option>
+        <option value="ديكورات داخلية">ديكورات داخلية</option>
+        <option value="مطابخ ومجالس">مطابخ ومجالس</option>
     </select>
-    <button class="btn-add" onclick="saveToFirebase()">حفظ ونشر</button>
+    <button class="btn-submit" onclick="uploadData()">نشر الآن على الموقع</button>
+    <p class="footer-note">ملاحظة: استخدم "Direct Link" من موقع رفع الصور لضمان الظهور.</p>
 </div>
 
 <script>
+    // إعدادات فايبربيس الخاصة بمشروعك
     const firebaseConfig = {
       apiKey: "AIzaSyB_Rj089s8Pwh5hrZjzAcki-gN7VL8JhB0",
       authDomain: "diwd-a7709.firebaseapp.com",
@@ -63,49 +76,78 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // إظهار وإخفاء لوحة التحكم
     function toggleAdmin() {
-        const p = document.getElementById('adminPanel');
-        const o = document.getElementById('overlay');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-        o.style.display = (o.style.display === 'block') ? 'none' : 'block';
+        const panel = document.getElementById('adminPanel');
+        const overlay = document.getElementById('overlay');
+        const isVisible = panel.style.display === 'block';
+        panel.style.display = isVisible ? 'none' : 'block';
+        overlay.style.display = isVisible ? 'none' : 'block';
     }
 
-    function saveToFirebase() {
-        const title = document.getElementById('t').value;
-        const url = document.getElementById('u').value;
-        const cat = document.getElementById('c').value;
+    // إرسال البيانات لفايبربيس
+    function uploadData() {
+        const title = document.getElementById('workTitle').value;
+        const url = document.getElementById('workURL').value;
+        const cat = document.getElementById('workCat').value;
 
-        if(title && url) {
-            db.ref('works').push({ title, img: url, category: cat })
-            .then(() => { alert("تمت الإضافة!"); location.reload(); });
-        } else { alert("أكمل البيانات أولاً"); }
-    }
-
-    db.ref('works').on('value', snap => {
-        const display = document.getElementById('mainDisplay');
-        const data = snap.val();
-        if(!data) { display.innerHTML = "المعرض فارغ حالياً"; return; }
-        
-        display.innerHTML = "";
-        let groups = {};
-        for(let id in data) {
-            let item = data[id];
-            if(!groups[item.category]) groups[item.category] = [];
-            groups[item.category].push(item);
+        if(!title || !url) {
+            alert("أخي محمد، يرجى ملء العنوان والرابط أولاً");
+            return;
         }
 
-        for(let cat in groups) {
-            let html = `<h2 class="section-title">${cat}</h2><div class="gallery">`;
-            groups[cat].forEach(item => {
-                html += `<div class="card">
-                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300?text=Error+Link'">
-                            <div style="padding:10px;">${item.title}</div>
-                         </div>`;
+        db.ref('works').push({
+            title: title,
+            image: url,
+            category: cat,
+            timestamp: Date.now()
+        }).then(() => {
+            alert("تمت الإضافة بنجاح! سيظهر العمل فوراً");
+            toggleAdmin();
+            document.getElementById('workTitle').value = "";
+            document.getElementById('workURL').value = "";
+        }).catch(err => {
+            alert("خطأ: تأكد من تفعيل Rules في Firebase");
+        });
+    }
+
+    // جلب البيانات وعرضها بشكل تلقائي
+    db.ref('works').on('value', snapshot => {
+        const container = document.getElementById('mainContent');
+        const data = snapshot.val();
+        
+        if (!data) {
+            container.innerHTML = "<p style='text-align:center; padding:50px;'>المعرض فارغ حالياً. اضغط على الاسم في الأعلى لإضافة أول صورة.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+        let categories = {};
+
+        // ترتيب البيانات حسب القسم
+        for (let id in data) {
+            let item = data[id];
+            if (!categories[item.category]) categories[item.category] = [];
+            categories[item.category].push(item);
+        }
+
+        // إنشاء الهيكل لكل قسم
+        for (let catName in categories) {
+            let sectionHTML = `<h2 class="section-title">${catName}</h2><div class="gallery">`;
+            
+            categories[catName].forEach(item => {
+                sectionHTML += `
+                    <div class="card">
+                        <img src="${item.image}" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'">
+                        <div class="card-info">${item.title}</div>
+                    </div>`;
             });
-            html += `</div>`;
-            display.innerHTML += html;
+
+            sectionHTML += `</div>`;
+            container.innerHTML += sectionHTML;
         }
     });
 </script>
+
 </body>
 </html>
