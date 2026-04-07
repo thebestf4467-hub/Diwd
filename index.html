@@ -4,50 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>DIWDECOR | المعرض</title>
-    
+    <title>DIWDECOR</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-
     <style>
         :root { --gold: #c19a6b; --dark: #1a1a1a; }
-        body { font-family: sans-serif; margin: 0; background: #f4f4f4; padding-bottom: 50px; }
-        header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 1000; }
-        .logo { font-size: 1.8rem; font-weight: bold; color: var(--gold); cursor: pointer; }
+        body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
+        header { background: var(--dark); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 1000; }
         .container { max-width: 1000px; margin: auto; padding: 15px; }
-        .section-title { border-right: 5px solid var(--gold); padding-right: 15px; margin: 30px 0 15px; font-size: 1.3rem; }
         .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        /* هذا الجزء يضمن عرض الصورة بشكل إجباري */
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .card img { width: 100%; height: 250px; object-fit: cover; display: block; background: #eee; }
-        .card-info { padding: 15px; text-align: center; font-weight: bold; }
-        
-        #admin { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 2000; width: 85%; max-width: 400px; }
+        #admin { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 2000; width: 85%; }
         .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; box-sizing: border-box; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
         .btn { background: var(--gold); color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo" onclick="toggle()">DIWDECOR</div>
+<header onclick="toggle()">
+    <div style="font-size: 1.5rem; color: var(--gold); font-weight: bold;">DIWDECOR</div>
+    <div style="font-size: 0.7rem;">اضغط هنا للإضافة</div>
 </header>
 
-<div class="container" id="output">
-    <p style="text-align:center;">جاري تحميل معرض الصور...</p>
-</div>
+<div class="container" id="output"></div>
 
 <div class="overlay" id="overlay" onclick="toggle()"></div>
 <div id="admin">
-    <h3 style="text-align: center;">إضافة عمل جديد</h3>
-    <input type="text" id="title" placeholder="اسم التصميم">
-    <input type="text" id="link" placeholder="رابط i.ibb.co المباشر">
-    <select id="cat">
-        <option value="واجهات حجر">واجهات حجر</option>
-        <option value="مطابخ">مطابخ</option>
-        <option value="مجالس">مجالس</option>
-    </select>
+    <input type="text" id="t" placeholder="اسم التصميم">
+    <input type="text" id="l" placeholder="رابط i.ibb.co المباشر">
     <button class="btn" onclick="send()">نشر الآن</button>
 </div>
 
@@ -67,18 +53,15 @@
     function toggle() {
         const a = document.getElementById('admin');
         const o = document.getElementById('overlay');
-        const show = a.style.display === 'block';
-        a.style.display = show ? 'none' : 'block';
-        o.style.display = show ? 'none' : 'block';
+        a.style.display = (a.style.display === 'block') ? 'none' : 'block';
+        o.style.display = (o.style.display === 'block') ? 'none' : 'block';
     }
 
     function send() {
-        const t = document.getElementById('title').value;
-        const l = document.getElementById('link').value;
-        const c = document.getElementById('cat').value;
-        if(t && l) {
-            // سنخزن الرابط في حقل اسمه image لتوحيد الكود
-            db.ref('works').push({ title: t, image: l, category: c }).then(() => {
+        const title = document.getElementById('t').value;
+        const link = document.getElementById('l').value;
+        if(title && link) {
+            db.ref('works').push({ title: title, image: link }).then(() => {
                 alert("تم الحفظ!");
                 toggle();
             });
@@ -89,30 +72,19 @@
         const out = document.getElementById('output');
         const data = s.val();
         if(!data) { out.innerHTML = "المعرض فارغ"; return; }
-        
-        out.innerHTML = "";
-        let groups = {};
+        out.innerHTML = '<div class="gallery">';
         for(let id in data) {
             let item = data[id];
-            // محاولة البحث عن الرابط في أي مسمى قديم (image, img, url, l)
-            let imgUrl = item.image || item.img || item.url || item.l || "";
-            let category = item.category || "عام";
-            if(!groups[category]) groups[category] = [];
-            groups[category].push({ t: item.title || item.t, src: imgUrl });
-        }
-
-        for(let name in groups) {
-            let html = `<h2 class="section-title">${name}</h2><div class="gallery">`;
-            groups[name].forEach(work => {
-                html += `
+            // هذا السطر يقرأ الرابط سواء كان اسمه image أو img أو l أو url
+            let img = item.image || item.img || item.l || item.url || "";
+            let name = item.title || item.t || "بدون عنوان";
+            out.innerHTML += `
                 <div class="card">
-                    <img src="${work.src}" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/400x300?text=Error+Link'">
-                    <div class="card-info">${work.t}</div>
+                    <img src="${img}" referrerpolicy="no-referrer" onerror="this.src='https://via.placeholder.com/300?text=Error+Link'">
+                    <div style="padding:15px; text-align:center; font-weight:bold;">${name}</div>
                 </div>`;
-            });
-            html += `</div>`;
-            out.innerHTML += html;
         }
+        out.innerHTML += '</div>';
     });
 </script>
 </body>
